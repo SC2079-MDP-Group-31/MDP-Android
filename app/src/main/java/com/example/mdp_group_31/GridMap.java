@@ -39,6 +39,61 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class GridMap extends View {
+    /**
+     * Update robot position and direction from Bluetooth message
+     */
+    public void setRobotPosition(int x, int y, String direction) {
+        // Validate coordinates
+        if (x < 2 || x > 20 || y < 1 || y > 19) {
+            Log.e(TAG, "setRobotPosition: Invalid coordinates x=" + x + ", y=" + y);
+            return;
+        }
+        // Validate direction
+        String dir = null;
+        if (direction == null) {
+            Log.e(TAG, "setRobotPosition: Direction is null");
+            return;
+        }
+        switch (direction.trim().toUpperCase()) {
+            case "N": dir = "up"; break;
+            case "S": dir = "down"; break;
+            case "E": dir = "right"; break;
+            case "W": dir = "left"; break;
+            default:
+                Log.e(TAG, "setRobotPosition: Invalid direction '" + direction + "'");
+                return;
+        }
+        // Update robot position and direction
+        setCurCoord(x, y, dir);
+        // Redraw map
+        invalidate();
+    }
+    /**
+     * Update the obstacle block with the target ID and face direction
+     */
+    public void displayTargetIdOnObstacle(int obstacleNumber, int targetId, String face) {
+        // obstacleNumber is 1-based index in obstacleCoord
+        if (obstacleNumber < 1 || obstacleNumber > obstacleCoord.size()) return;
+        int[] coord = obstacleCoord.get(obstacleNumber - 1); // [col, row]
+        int col = coord[0];
+        int row = coord[1];
+        // Update target ID in ITEM_LIST
+        ITEM_LIST.get(row)[col] = String.valueOf(targetId);
+        // Update face direction in imageBearings
+        if (face != null) {
+            switch (face.toUpperCase()) {
+                case "N": case "NORTH": imageBearings.get(row)[col] = "North"; break;
+                case "S": case "SOUTH": imageBearings.get(row)[col] = "South"; break;
+                case "E": case "EAST": imageBearings.get(row)[col] = "East"; break;
+                case "W": case "WEST": imageBearings.get(row)[col] = "West"; break;
+                default: imageBearings.get(row)[col] = ""; break;
+            }
+        } else {
+            imageBearings.get(row)[col] = "";
+        }
+        // Force redraw
+        postInvalidate();
+    }
     public GridMap(Context c) {
         super(c);
         initMap();
@@ -140,6 +195,24 @@ public class GridMap extends View {
 
         this.val2IdxMap = new HashMap<>();
     }
+    public boolean isCellFree(int col, int row) {
+        // Check boundaries first
+        if (col < 0 || col >= COL || row < 0 || row >= ROW) {
+            return false; // Out of bounds considered blocked
+        }
+
+        // Check if cell is an obstacle based on obstacleCoord list
+        for (int[] obs : obstacleCoord) {
+            if (obs[0] == col && obs[1] == row) {
+                return false; // Found an obstacle
+            }
+        }
+
+        // Optionally, check ITEMLIST or cells array if needed to confirm cell type is free
+        // Assuming obstacleCoord is sufficient as primary obstacle indicator
+
+        return true; // No obstacle found, cell is free
+    }
 
     private void initMap() {
         setWillNotDraw(false);
@@ -170,77 +243,74 @@ public class GridMap extends View {
 
         showLog("Exiting onDraw");
     }
-
+    
     // draws obstacle cells whenever map refreshes
     private void drawObstacles(Canvas canvas) {
         showLog("Entering drawObstacles");
-        for (int i = 0; i < obstacleCoord.size(); i++) { // for each recorded obstacle
-            // get col and row (zero-indexed)
-            int col = obstacleCoord.get(i)[0];
-            int row = obstacleCoord.get(i)[1];
-            // cells[col + 1][19 - row] is an unexplored obstacle (image not yet identified)
-            if (ITEM_LIST.get(row)[col] == null || ITEM_LIST.get(row)[col].equals("")
-                    || ITEM_LIST.get(row)[col].equals("Nil")) {
-                showLog("drawObstacles: drawing obstacle ID");
-                whitePaint.setTextSize(15);
-                canvas.drawText(
-                        String.valueOf(i + 1),
-                        cells[col + 1][19 - row].startX + ((cells[1][1].endX - cells[1][1].startX) / 2),
-                        cells[col + 1][19 - row].startY + ((cells[1][1].endY - cells[1][1].startY) / 2) + 5,
-                        whitePaint
-                );
-            } else {    // cells[col + 1][19 - row] is an explored obstacle (image has been identified)
-                showLog("drawObstacles: drawing image ID");
-                whitePaint.setTextSize(17);
-                canvas.drawText(
-                        ITEM_LIST.get(row)[col],
-                        cells[col + 1][19 - row].startX + ((cells[1][1].endX - cells[1][1].startX) / 2),
-                        cells[col + 1][19 - row].startY + ((cells[1][1].endY - cells[1][1].startY) / 2) + 10,
-                        whitePaint
-                );
-            }
-
-            // color the face direction
-            // imageBearings.get(row)[col], row and col are just zero-indexed based on the displayed grid (range is 0 - 19)
-            switch (imageBearings.get(row)[col]) {
-                case "North":
-                    canvas.drawLine(
-                            cells[col + 1][19 - row].startX,
-                            cells[col + 1][19 - row].startY,
-                            cells[col + 1][19 - row].endX,
-                            cells[col + 1][19 - row].startY,
-                            maroonPaint
-                    );
-                    break;
-                case "South":
-                    canvas.drawLine(
-                            cells[col + 1][19 - row].startX,
-                            cells[col + 1][19 - row].startY + cellSize,
-                            cells[col + 1][19 - row].endX,
-                            cells[col + 1][19 - row].startY + cellSize,
-                            maroonPaint
-                    );
-                    break;
-                case "East":
-                    canvas.drawLine(
-                            cells[col + 1][19 - row].startX + cellSize,
-                            cells[col + 1][19 - row].startY,
-                            cells[col + 1][19 - row].startX + cellSize,
-                            cells[col + 1][19 - row].endY,
-                            maroonPaint
-                    );
-                    break;
-                case "West":
-                    canvas.drawLine(
-                            cells[col + 1][19 - row].startX,
-                            cells[col + 1][19 - row].startY,
-                            cells[col + 1][19 - row].startX,
-                            cells[col + 1][19 - row].endY,
-                            maroonPaint
-                    );
-                    break;
-            }
+    for (int i = 0; i < obstacleCoord.size(); i++) { // for each recorded obstacle
+        int col = obstacleCoord.get(i)[0];
+        int row = obstacleCoord.get(i)[1];
+        // If obstacle not yet identified
+        if (ITEM_LIST.get(row)[col] == null || ITEM_LIST.get(row)[col].equals("")
+            || ITEM_LIST.get(row)[col].equals("Nil")) {
+        showLog("drawObstacles: drawing obstacle ID");
+        whitePaint.setTextSize(11); // smaller initial font size
+        canvas.drawText(
+            String.valueOf(i + 1),
+            cells[col + 1][19 - row].startX + ((cells[1][1].endX - cells[1][1].startX) / 2),
+            cells[col + 1][19 - row].startY + ((cells[1][1].endY - cells[1][1].startY) / 2) + 5,
+            whitePaint
+        );
+        } else {
+        showLog("drawObstacles: drawing image ID");
+        whitePaint.setTextSize(17); // large font for identified target
+        canvas.drawText(
+            ITEM_LIST.get(row)[col],
+            cells[col + 1][19 - row].startX + ((cells[1][1].endX - cells[1][1].startX) / 2),
+            cells[col + 1][19 - row].startY + ((cells[1][1].endY - cells[1][1].startY) / 2) + 10,
+            whitePaint
+        );
+        // Only draw direction line if imageBearings is set (after remote message)
+        switch (imageBearings.get(row)[col]) {
+            case "North":
+            canvas.drawLine(
+                cells[col + 1][19 - row].startX,
+                cells[col + 1][19 - row].startY,
+                cells[col + 1][19 - row].endX,
+                cells[col + 1][19 - row].startY,
+                maroonPaint
+            );
+            break;
+            case "South":
+            canvas.drawLine(
+                cells[col + 1][19 - row].startX,
+                cells[col + 1][19 - row].startY + cellSize,
+                cells[col + 1][19 - row].endX,
+                cells[col + 1][19 - row].startY + cellSize,
+                maroonPaint
+            );
+            break;
+            case "East":
+            canvas.drawLine(
+                cells[col + 1][19 - row].startX + cellSize,
+                cells[col + 1][19 - row].startY,
+                cells[col + 1][19 - row].startX + cellSize,
+                cells[col + 1][19 - row].endY,
+                maroonPaint
+            );
+            break;
+            case "West":
+            canvas.drawLine(
+                cells[col + 1][19 - row].startX,
+                cells[col + 1][19 - row].startY,
+                cells[col + 1][19 - row].startX,
+                cells[col + 1][19 - row].endY,
+                maroonPaint
+            );
+            break;
         }
+        }
+    }
         showLog("Exiting drawObstacles");
     }
 
@@ -534,6 +604,7 @@ public class GridMap extends View {
         // cells[col][row] is the BOTTOM LEFT of the 2x2 robot
         for (int x = col - 1; x <= col; x++)
             for (int y = row - 1; y <= row; y++)
+                if (x >= 0 && x <= COL && y >= 0 && y <= ROW && cells[x][y] != null)
                 cells[x][y].setType("robot");
 
         showLog("Exiting setCurCoord");

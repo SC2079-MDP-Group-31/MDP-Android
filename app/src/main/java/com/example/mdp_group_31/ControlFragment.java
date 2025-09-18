@@ -22,6 +22,24 @@ import androidx.fragment.app.Fragment;
 import java.util.Arrays;
 
 public class ControlFragment extends Fragment {
+    // Bluetooth message handler for TARGET messages
+    public static void handleBluetoothMessage(String message) {
+        if (message != null && message.startsWith("TARGET")) {
+            String[] parts = message.split(",");
+            if (parts.length >= 3) {
+                try {
+                    int obstacleNum = Integer.parseInt(parts[1]);
+                    int targetId = Integer.parseInt(parts[2]);
+                    String face = (parts.length > 3) ? parts[3] : null;
+                    if (gridMap != null) {
+                        gridMap.displayTargetIdOnObstacle(obstacleNum, targetId, face);
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Error parsing TARGET message: " + message);
+                }
+            }
+        }
+    }
     private static final String TAG = "ControlFragment";
 
     SharedPreferences sharedPreferences;
@@ -109,121 +127,167 @@ public class ControlFragment extends Fragment {
 
         // Button Listener
         moveForwardImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked moveForwardImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    String dir = gridMap.getRobotDirection();
-                    switch(dir) {
-                        case "up": gridMap.moveOneCell("up"); break;
-                        case "down": gridMap.moveOneCell("down"); break;
-                        case "left": gridMap.moveOneCell("left"); break;
-                        case "right": gridMap.moveOneCell("right"); break;
-                    }
-                    Home.refreshLabel();
-                    if (gridMap.getValidPosition()) {
-                        updateStatus("moving forward");
-                    } else {
-                        Home.printMessage("obstacle");
-                        updateStatus("Unable to move forward");
-                    }
+    @Override
+    public void onClick(View view) {
+        showLog("Clicked moveForwardImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            int[] coord = gridMap.getCurCoord();
+            int col = coord[0];
+            int row = coord[1];
+            // Check next cell for obstacle before moving
+            if (row < 19 && gridMap.isCellFree(col, row + 1)) {
+                gridMap.moveOneCell("up");
+                Home.refreshLabel();
+                gridMap.invalidate();
+                updateStatus("Robot moved forward");
+                Home.printMessage("f");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot moved forward.");
+            } else if (row < 19 && !gridMap.isCellFree(col, row + 1)) {
+                updateStatus("Robot is blocked by obstacle!");
+                Home.printMessage("obstacle");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot is blocked by obstacle!");
+            } else {
+                updateStatus("Robot cannot move forward, at grid edge.");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot cannot move forward, at grid edge.");
+            }
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting moveForwardImageBtn");
+    }
+});
 
+turnRightImageBtn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        showLog("Clicked turnRightImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            int[] coord = gridMap.getCurCoord();
+            int col = coord[0];
+            int row = coord[1];
+            if (col < 20 && gridMap.isCellFree(col + 1, row)) {
+                gridMap.moveOneCell("right");
+                Home.refreshLabel();
+                gridMap.invalidate();
+                updateStatus("Robot turned right");
+                Home.printMessage("tr");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot turned right.");
+            } else if (col < 20 && !gridMap.isCellFree(col + 1, row)) {
+                updateStatus("Robot is blocked by obstacle!");
+                Home.printMessage("obstacle");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot is blocked by obstacle!");
+            } else {
+                updateStatus("Robot cannot turn right, at grid edge.");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot cannot turn right, at grid edge.");
+            }
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting turnRightImageBtn");
+    }
+});
 
-                    Home.printMessage("f");
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting moveForwardImageBtn");
-            }
-        });
+turnbrightImageBtn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        if (robotStatusTextView != null) {
+            robotStatusTextView.setText("Robot action: turning back right");
+        }
+        showLog("Clicked turnbRightImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            gridMap.moveOneCell("backright");
+            Home.refreshLabel();
+            gridMap.invalidate();
+            updateStatus("turning back right");
+            Home.printMessage("br");
+            System.out.println(Arrays.toString(gridMap.getCurCoord()));
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting turnbRightImageBtn");
+    }
+});
 
-        turnRightImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked turnRightImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    gridMap.moveOneCell("right");
-                    Home.refreshLabel();
-                    Home.printMessage("fr");
-//                    showLog("test");
-                    System.out.println(Arrays.toString(gridMap.getCurCoord()));
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting turnRightImageBtn");
+moveBackImageBtn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        showLog("Clicked moveBackwardImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            int[] coord = gridMap.getCurCoord();
+            int col = coord[0];
+            int row = coord[1];
+            if (row > 1 && gridMap.isCellFree(col, row - 1)) {
+                gridMap.moveOneCell("down");
+                Home.refreshLabel();
+                gridMap.invalidate();
+                updateStatus("Robot moved backward");
+                Home.printMessage("r");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot moved backward.");
+            } else if (row > 1 && !gridMap.isCellFree(col, row - 1)) {
+                updateStatus("Robot is blocked by obstacle!");
+                Home.printMessage("obstacle");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot is blocked by obstacle!");
+            } else {
+                updateStatus("Robot cannot move backward, at grid edge.");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot cannot move backward, at grid edge.");
             }
-        });
-        turnbrightImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked turnbRightImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    gridMap.moveOneCell("backright");
-                    Home.refreshLabel();
-                    Home.printMessage("br");
-                    System.out.println(Arrays.toString(gridMap.getCurCoord()));
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting turnbRightImageBtn");
-            }
-        });
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting moveBackwardImageBtn");
+    }
+});
 
-        moveBackImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked moveBackwardImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    String dir = gridMap.getRobotDirection();
-                    switch(dir) {
-                        case "up": gridMap.moveOneCell("down"); break;
-                        case "down": gridMap.moveOneCell("up"); break;
-                        case "left": gridMap.moveOneCell("right"); break;
-                        case "right": gridMap.moveOneCell("left"); break;
-                    }
-                    Home.refreshLabel();
-                    if (gridMap.getValidPosition())
-                        updateStatus("moving backward");
-                    else
-                        updateStatus("Unable to move backward");
-                    Home.printMessage("b");
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting moveBackwardImageBtn");
+turnLeftImageBtn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        showLog("Clicked turnLeftImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            int[] coord = gridMap.getCurCoord();
+            int col = coord[0];
+            int row = coord[1];
+            if (col > 2 && gridMap.isCellFree(col - 1, row)) {
+                gridMap.moveOneCell("left");
+                Home.refreshLabel();
+                gridMap.invalidate();
+                updateStatus("Robot turned left");
+                Home.printMessage("tl");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot turned left.");
+            } else if (col > 2 && !gridMap.isCellFree(col - 1, row)) {
+                updateStatus("Robot is blocked by obstacle!");
+                Home.printMessage("obstacle");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot is blocked by obstacle!");
+            } else {
+                updateStatus("Robot cannot turn left, at grid edge.");
+                if (robotStatusTextView != null) robotStatusTextView.setText("Robot cannot turn left, at grid edge.");
             }
-        });
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting turnLeftImageBtn");
+    }
+});
 
-        turnLeftImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked turnLeftImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    gridMap.moveOneCell("left");
-                    Home.refreshLabel();
-                    updateStatus("turning left");
-                    Home.printMessage("fl");
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting turnLeftImageBtn");
-            }
-        });
-        turnbleftImageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showLog("Clicked turnbLeftImageBtn");
-                if (gridMap.getCanDrawRobot()) {
-                    gridMap.moveOneCell("backleft");
-                    Home.refreshLabel();
-                    updateStatus("turning left");
-                    Home.printMessage("bl");
-                }
-                else
-                    updateStatus("Please press 'SET START POINT'");
-                showLog("Exiting turnbLeftImageBtn");
-            }
-        });
+turnbleftImageBtn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        if (robotStatusTextView != null) {
+            robotStatusTextView.setText("Robot action: turning back left");
+        }
+        showLog("Clicked turnbLeftImageBtn");
+        if (gridMap.getCanDrawRobot()) {
+            gridMap.moveOneCell("backleft");
+            Home.refreshLabel();
+            gridMap.invalidate();
+            updateStatus("turning back left");
+            Home.printMessage("bl");
+        } else {
+            updateStatus("Please press 'SET START POINT'");
+        }
+        showLog("Exiting turnbLeftImageBtn");
+    }
+});
+
 
         // Start Task 1 challenge
         exploreButton.setOnClickListener(new View.OnClickListener() {

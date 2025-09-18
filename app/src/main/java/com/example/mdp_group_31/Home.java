@@ -1,11 +1,13 @@
 package com.example.mdp_group_31;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
@@ -172,7 +174,7 @@ public class Home extends Fragment {
         return gridMap;
     }
     public static TextView getRobotStatusTextView() {  return robotStatusTextView; }
-
+    private static BluetoothConnectionService bluetoothService;
     public static ImageButton getUpBtn() { return upBtn; }
     public static ImageButton getDownBtn() { return downBtn; }
     public static ImageButton getLeftBtn() { return leftBtn; }
@@ -206,7 +208,9 @@ public class Home extends Fragment {
         // Translated ver is sent
         if (BluetoothConnectionService.BluetoothConnectionStatus == true){
             byte[] bytes = strArr[1].getBytes(Charset.defaultCharset());
-            BluetoothConnectionService.write(bytes);
+            bluetoothService.write(bytes);
+
+
         }
 
         // Display both untranslated and translated coordinates on CHAT (for debugging)
@@ -222,7 +226,7 @@ public class Home extends Fragment {
 
         if (BluetoothConnectionService.BluetoothConnectionStatus) {
             byte[] bytes = message.getBytes(Charset.defaultCharset());
-            BluetoothConnectionService.write(bytes);
+            bluetoothService.write(bytes);
         }
         showLog(message);
         showLog("Exiting printMessage");
@@ -300,6 +304,7 @@ public class Home extends Fragment {
     }
 
     private final BroadcastReceiver mBroadcastReceiver5 = new BroadcastReceiver() {
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         @Override
         public void onReceive(Context context, Intent intent) {
             BluetoothDevice mDevice = intent.getParcelableExtra("Device");
@@ -343,6 +348,18 @@ public class Home extends Fragment {
             showLog("receivedMessage: message --- " + message);
 
             String[] cmdd = message.split(",");
+                // Check for new format: ROBOT,<x>,<y>,<direction>
+                if (message.startsWith("ROBOT") && cmdd.length == 4) {
+                    try {
+                        int x = Integer.parseInt(cmdd[1].trim());
+                        int y = Integer.parseInt(cmdd[2].trim());
+                        String direction = cmdd[3].trim();
+                        gridMap.setCurCoord(x, y, direction);
+                        showLog("Updated robot position: x=" + x + ", y=" + y + ", dir=" + direction);
+                    } catch (Exception e) {
+                        showLog("Error parsing ROBOT message: " + e.getMessage());
+                    }
+                }
 
 //            if (message.contains(" "))
 //            {
