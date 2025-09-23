@@ -93,6 +93,13 @@ public class BluetoothCommunications extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String text = intent.getStringExtra("receivedMessage");
             messageReceivedTextView.append(text+"\n");
+            try {
+                // Update robot position/direction using PathTranslator
+                PathTranslator translator = new PathTranslator();
+                translator.altTranslation(text); // or use translatePath(text) if needed
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating robot position from message: " + text, e);
+            }
         }
     };
 }

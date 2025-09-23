@@ -145,6 +145,29 @@ public class GridMap extends View {
 
     private static int X_OFFSET = 0;
     private static int Y_OFFSET = 0;
+    public void rotateRobot(String direction) {
+        if (robotDirection == null || robotDirection.equals("None")) {
+            robotDirection = "N"; // default
+        }
+
+        switch (robotDirection) {
+            case "N": // Facing North
+                robotDirection = direction.equalsIgnoreCase("right") ? "E" : "W";
+                break;
+            case "E": // Facing East
+                robotDirection = direction.equalsIgnoreCase("right") ? "S" : "N";
+                break;
+            case "S": // Facing South
+                robotDirection = direction.equalsIgnoreCase("right") ? "W" : "E";
+                break;
+            case "W": // Facing West
+                robotDirection = direction.equalsIgnoreCase("right") ? "N" : "S";
+                break;
+        }
+
+        setRobotDirection(robotDirection); // persist + update
+        invalidate(); // redraw
+    }
 
     public int movesRx = 0;
     public int moves = 0;
