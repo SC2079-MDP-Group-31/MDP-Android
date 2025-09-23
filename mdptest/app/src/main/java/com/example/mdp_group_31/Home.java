@@ -1,6 +1,7 @@
 package com.example.mdp_group_31;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -23,6 +24,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,9 +34,13 @@ import android.widget.Toast;
 import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Home extends Fragment {
@@ -362,7 +369,7 @@ public class Home extends Fragment {
                 robotStatusTextView.setText(message.split(":")[1]);
             }
             //ROBOT|5,4,EAST (Early version of updating robot position via comms)
-            if(message.contains("ROBOT")) {
+            /*if(message.contains("ROBOT")) {
                 String[] cmd = message.split("\\|");
                 String[] sentCoords = cmd[1].split(",");
                 String[] sentDirection = sentCoords[2].split("\\.");
@@ -385,6 +392,57 @@ public class Home extends Fragment {
                     direction = "";
                 }
                 gridMap.setCurCoord(Integer.valueOf(sentCoords[1]) + 2, 19 - Integer.valueOf(sentCoords[0]), direction);
+            }*/
+            if (message.contains("ROBOT")) {
+                try {
+                    // Expect "ROBOT|x,y,BEARING"
+                    String[] cmd = message.split("\\|", 2);
+                    if (cmd.length < 2) return;
+
+                    String[] sentCoords = cmd[1].split(",");
+                    if (sentCoords.length < 3) return;
+
+                    // Raw numbers as sent by the sender
+                    int xRaw = Integer.parseInt(sentCoords[0].trim());
+                    int yRaw = Integer.parseInt(sentCoords[1].trim());
+
+                    // Bearing token (drop any suffix after a dot)
+                    String bearingToken = sentCoords[2].split("\\.")[0].trim().toUpperCase();
+
+                    // Map bearing to internal direction
+                    String direction;
+                    switch (bearingToken) {
+                        case "EAST":  direction = "right"; break;
+                        case "WEST":  direction = "left";  break;
+                        case "SOUTH": direction = "down";  break;
+                        case "NORTH":
+                        default:      direction = "up";    break;
+                    }
+
+                    // Detect units: if numbers look large, treat as centimeters
+                    boolean looksLikeCm = (xRaw >= 20 || yRaw >= 20);
+
+                    int col, row;
+                    if (looksLikeCm) {
+                        // cm → nearest multiple of 5 cm → cells; keep Home-2 offsets
+                        int xAdj = Math.round(xRaw / 5.0f) * 5;
+                        int yAdj = Math.round(yRaw / 5.0f) * 5;
+                        col = (xAdj / 5) + 2;   // same as: col = xCells + 2
+                        row = (yAdj / 5) + 1;   // same as: row = yCells + 1
+                    } else {
+                        // Legacy Home-1 path: x,y are already cells; keep original mapping
+                        col = yRaw + 2;
+                        row = 19 - xRaw;
+                    }
+
+                    // (Optional) basic bounds clamp to avoid silent no-ops
+                    if (col < 0) col = 0; if (col > 20) col = 20;
+                    if (row < 0) row = 0; if (row > 20) row = 20;
+
+                    gridMap.setCurCoord(col, row, direction);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             //image format from RPI is "TARGET~<obID>~<ImValue>" eg TARGET~3~7
             else if(message.contains("TARGET")) {
@@ -512,81 +570,5 @@ public class Home extends Fragment {
         Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP,0, 0);
         toast.show();
-    }
-
-    private void handleIncomingBluetoothMessage(final String rawMsg) {
-        if (rawMsg == null) return;
-        final String msg = rawMsg.trim();
-        if (msg.isEmpty()) return;
-
-        // ROBOT message: ROBOT,<x>,<y>,<BEARING>
-        if (msg.toUpperCase().startsWith("ROBOT,")) {
-            String[] parts = msg.split(",");
-            if (parts.length >= 4) {
-                try {
-                    final int x = Integer.parseInt(parts[1].trim());
-                    final int y = Integer.parseInt(parts[2].trim());
-                    final String bearingToken = parts[3].trim().toUpperCase();
-
-                    // Round to nearest multiple of 5 (keeps multiples-of-5 semantics)
-                    final int xAdj = Math.round(x / 5.0f) * 5;
-                    final int yAdj = Math.round(y / 5.0f) * 5;
-
-                    // Convert to app grid coords
-                    final int col = xAdj / 5 + 2;
-                    final int row = yAdj / 5 + 1;
-
-                    final String bearing;
-                    switch (bearingToken) {
-                        case "NORTH": bearing = "up"; break;
-                        case "EAST":  bearing = "right"; break;
-                        case "SOUTH": bearing = "down"; break;
-                        case "WEST":  bearing = "left"; break;
-                        default:      bearing = "up"; break;
-                    }
-
-                    Activity act = getActivity();
-                    if (act != null) {
-                        act.runOnUiThread(() -> {
-                            if (gridMap != null) {
-                                // basic bounds check before applying (adjust range if your app differs)
-                                if (col >= 2 && col <= 20 && row >= 1 && row <= 19) {
-                                    gridMap.setCurCoord(col, row, bearing);
-                                    gridMap.setRobotDirection(bearing);
-                                    gridMap.invalidate();
-                                } else {
-                                    // out of bounds: ignore or log
-                                }
-                            }
-                        });
-                    }
-                    return;
-                } catch (NumberFormatException ex) {
-                    // parse error: ignore or log
-                }
-            }
-        }
-
-        // Short commands (fallback): f, tr, tl, r
-        final String token = msg.toLowerCase();
-        Activity act2 = getActivity();
-        if (act2 != null) {
-            act2.runOnUiThread(() -> {
-                if (gridMap == null) return;
-                switch (token) {
-                    case "f": gridMap.moveRobot("forward"); break;
-                    case "tr": gridMap.moveRobot("right");   break; // rotate right
-                    case "tl": gridMap.moveRobot("left");    break; // rotate left
-                    case "r": gridMap.moveRobot("back");     break; // reverse/back
-                    // backward-compatibility for old tokens
-                    case "b": gridMap.moveRobot("back");    break;
-                    case "fl": gridMap.moveRobot("left");   break;
-                    case "fr": gridMap.moveRobot("right");  break;
-                    default:
-                        // unknown — optionally log
-                        break;
-                }
-            });
-        }
     }
 }

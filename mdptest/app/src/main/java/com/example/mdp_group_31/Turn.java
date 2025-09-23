@@ -1,10 +1,11 @@
-package com.example.mdp_group_31;
+/*package com.example.mdp_group_14;
 
 import java.util.*;
 import java.util.AbstractMap.*;
 import java.util.function.BiFunction;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 
 public class Turn {
 
@@ -232,7 +233,7 @@ public class Turn {
     }
 
     static int radius(String direction) {
-        return 3;
+        return 0;
     }
 
     static ArrayList<Integer[]> curve(Integer[] initial, Integer[] destination, int radius, int centreX, int centreY, int quadrant) {
@@ -297,5 +298,63 @@ public class Turn {
 
     static int manhattanDistance(Integer[] a, Integer[] b) {
         return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+    }
+}*/
+
+
+package com.example.mdp_group_31;
+
+import java.util.*;
+import java.util.AbstractMap.*;
+
+public class Turn {
+
+    public static Map.Entry<String, ArrayList<Integer[]>> turn(Integer[] start, String direction, String turn) {
+        String newDir = computeNewDirection(direction, turn);
+
+        // robot stays on the same cell
+        ArrayList<Integer[]> path = new ArrayList<>();
+        path.add(new Integer[]{start[0], start[1]});
+
+        return new SimpleEntry<>(newDir, path);
+    }
+
+    // maps current direction + turn instruction to the new direction
+    private static String computeNewDirection(String direction, String turn) {
+        switch (direction) {
+            case "up":
+                switch (turn) {
+                    case "left": return "left";
+                    case "right": return "right";
+                    case "backleft": return "right";
+                    case "backright": return "left";
+                }
+                break;
+            case "right":
+                switch (turn) {
+                    case "left": return "up";
+                    case "right": return "down";
+                    case "backleft": return "down";
+                    case "backright": return "up";
+                }
+                break;
+            case "down":
+                switch (turn) {
+                    case "left": return "right";
+                    case "right": return "left";
+                    case "backleft": return "left";
+                    case "backright": return "right";
+                }
+                break;
+            case "left":
+                switch (turn) {
+                    case "left": return "down";
+                    case "right": return "up";
+                    case "backleft": return "up";
+                    case "backright": return "down";
+                }
+                break;
+        }
+        throw new IllegalStateException("Invalid robot direction: " + direction + " & turn: " + turn);
     }
 }

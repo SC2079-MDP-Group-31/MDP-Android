@@ -19,6 +19,8 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import java.util.Arrays;
+
 public class MappingFragment extends Fragment {
     private static final String TAG = "MapFragment";
 
@@ -199,7 +201,7 @@ public class MappingFragment extends Fragment {
                     editor.putString("maps", "");
                     editor.commit();
                 }
-                getObsPos = gridMap.saveObstacleList();
+                getObsPos = GridMap.saveObstacleList();
                 editor.putString("maps",getObsPos);
                 editor.commit();
                 showToast("Saved map");

@@ -82,14 +82,7 @@ public class PathTranslator {
                 break;
             case 'd':   // 90 deg right
 //                Home.refreshMessageReceivedNS("==========================\nRight turn");
-                switch(dir) {
-                    case "up":    dir = "right"; break;
-                    case "down":  dir = "left"; break;
-                    case "left":  dir = "up"; break;
-                    case "right": dir = "down"; break;
-                }
-
-                /* moves = RIGHT_TURNING_RADIUS / CELL_LENGTH;  // floor div. of turning radius against cell len
+                moves = RIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
                         curY += moves;
@@ -111,18 +104,12 @@ public class PathTranslator {
                         curY -= moves;
                         dir = "down";
                         break;
-                } */
+                }
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'a':   // 90 deg left
 //                Home.refreshMessageReceivedNS("==========================\nLeft turn");
-                switch(dir) {
-                    case "up":    dir = "right"; break;
-                    case "down":  dir = "left"; break;
-                    case "left":  dir = "up"; break;
-                    case "right": dir = "down"; break;
-                }
-                /*moves = LEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
+                moves = LEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
                         curY += moves;
@@ -144,18 +131,12 @@ public class PathTranslator {
                         curY += moves;
                         dir = "up";
                         break;
-                } */
+                }
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'q':   // 90 deg back-left
 //                Home.refreshMessageReceivedNS("==========================\nBack-left turn");
-                switch(dir) {
-                    case "up":    dir = "right"; break;
-                    case "down":  dir = "left"; break;
-                    case "left":  dir = "up"; break;
-                    case "right": dir = "down"; break;
-                }
-                /* moves = BLEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
+                moves = BLEFT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
                         curY -= moves;
@@ -177,18 +158,12 @@ public class PathTranslator {
                         curY += moves;
                         dir = "down";
                         break;
-                } */
+                }
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 'e':   // 90 deg back-right
 //                Home.refreshMessageReceivedNS("==========================\nBack-right turn");
-                switch(dir) {
-                    case "up":    dir = "right"; break;
-                    case "down":  dir = "left"; break;
-                    case "left":  dir = "up"; break;
-                    case "right": dir = "down"; break;
-                }
-                /*moves = BRIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
+                moves = BRIGHT_TURNING_RADIUS / CELL_LENGTH;   // floor div. of turning radius against cell len
                 switch(dir) {
                     case "up":
                         curY -= moves;
@@ -210,7 +185,7 @@ public class PathTranslator {
                         curY -= moves;
                         dir = "up";
                         break;
-                }*/
+                }
 //                gridMap.setCurCoord(curX, curY, dir);
                 break;
             case 's':   // stop to scan (might be redundant)
@@ -284,8 +259,8 @@ public class PathTranslator {
         switch(commandType) {
             case 'f':   // forward
 //                Home.refreshMessageReceivedNS("==========================\nForward " + commandValue);
-                int move_dist = 1; // int move_dist = commandValue / CELL_LENGTH;
-                for(int i = 0; i < move_dist; i++) {
+                moves = commandValue / CELL_LENGTH;
+                for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("forward");
 
 
@@ -294,8 +269,11 @@ public class PathTranslator {
                     if (gridMap.getValidPosition()){
                         showLog("moving forward");}
                     else {
+//                        Home.printMessage("obstacle");
                         showLog("Unable to move forward");
                     }
+
+                    Home.printMessage("f");
 
                     try {
                         Thread.sleep(MILLI_DELAY);
@@ -307,9 +285,8 @@ public class PathTranslator {
                 break;
             case 'b':   // backwards
 //                Home.refreshMessageReceivedNS("==========================\nBackward " + commandValue);
-                // int move_dist = commandValue / CELL_LENGTH;
-                move_dist=1;
-                for(int i = 0; i < move_dist; i++) {
+                moves = commandValue / CELL_LENGTH;
+                for(int i = 0; i < moves; i++) {
                     gridMap.moveRobot("back");
                     Home.refreshLabel();
                     try {

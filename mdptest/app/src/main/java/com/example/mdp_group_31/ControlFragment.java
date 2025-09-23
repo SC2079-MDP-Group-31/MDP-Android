@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -123,7 +124,7 @@ public class ControlFragment extends Fragment {
                         updateStatus("Unable to move forward");
                     }
 
-                    // shorthand 'f' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("f");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -138,7 +139,7 @@ public class ControlFragment extends Fragment {
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("right");
                     Home.refreshLabel();
-                    // shorthand 'tr' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("fr");
 //                    showLog("test");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
@@ -154,7 +155,7 @@ public class ControlFragment extends Fragment {
                 if (gridMap.getCanDrawRobot()) {
                     gridMap.moveRobot("backright");
                     Home.refreshLabel();
-                    // shorthand 'r' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("br");
                     System.out.println(Arrays.toString(gridMap.getCurCoord()));
                 }
                 else
@@ -174,7 +175,7 @@ public class ControlFragment extends Fragment {
                         updateStatus("moving backward");
                     else
                         updateStatus("Unable to move backward");
-                    // shorthand 'r' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("b");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -190,7 +191,7 @@ public class ControlFragment extends Fragment {
                     gridMap.moveRobot("left");
                     Home.refreshLabel();
                     updateStatus("turning left");
-                    // shorthand 'tl' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("fl");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
@@ -205,7 +206,7 @@ public class ControlFragment extends Fragment {
                     gridMap.moveRobot("backleft");
                     Home.refreshLabel();
                     updateStatus("turning left");
-                    // shorthand 'r' is sent from GridMap.moveRobot to avoid duplicates
+                    Home.printMessage("bl");
                 }
                 else
                     updateStatus("Please press 'SET START POINT'");
