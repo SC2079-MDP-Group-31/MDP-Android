@@ -86,29 +86,24 @@ public class MappingFragment extends Fragment {
                 showLog("Click count: " + clicks);
                 switch(clicks) {
                     case 0:
-                        emergencyBtn.setImageDrawable(getResources().getDrawable(R.drawable.snor_0));
                         path = "LL";
-                        showLog("Set eBtn to snor_0!");
+                        showLog("Set eBtn to state 0!");
                         break;
                     case 1:
-                        emergencyBtn.setImageDrawable(getResources().getDrawable(R.drawable.snor_1));
                         path = "LR";
-                        showLog("Set eBtn to snor_1!");
+                        showLog("Set eBtn to state 1!");
                         break;
                     case 2:
-                        emergencyBtn.setImageDrawable(getResources().getDrawable(R.drawable.snor_2));
                         path = "RL";
-                        showLog("Set eBtn to snor_2!");
+                        showLog("Set eBtn to state 2!");
                         break;
                     case 3:
-                        emergencyBtn.setImageDrawable(getResources().getDrawable(R.drawable.snor_3));
                         path = "RR";
-                        showLog("Set eBtn to snor_3!");
+                        showLog("Set eBtn to state 3!");
                         break;
                     case 4:
-                        emergencyBtn.setImageDrawable(getResources().getDrawable(R.drawable.snor_4));
                         path = "G";
-                        showLog("Set eBtn to snor_4!");
+                        showLog("Set eBtn to state 4!");
                         break;
                     default:    // should NOT occur
                         showLog("Click count error!!");

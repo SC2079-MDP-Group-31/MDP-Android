@@ -2,11 +2,13 @@ package com.example.mdp_group_31;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
@@ -16,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -320,13 +323,25 @@ public class Home extends Fragment {
                     e.printStackTrace();
                 }
 
-                Log.d(TAG, "mBroadcastReceiver5: Device now connected to "+mDevice.getName());
-                updateStatus("Device now connected to "
-                        + mDevice.getName());
-                editor.putString("connStatus", "Connected to " + mDevice.getName());
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                    // safe to call Bluetooth APIs:
+                    Log.d(TAG, "Connected to " + mDevice.getName());
+                    updateStatus("Device now connected to " + mDevice.getName());
+                    editor.putString("connStatus", "Connected to " + mDevice.getName());
+                } else {
+                    // Permission not granted, handle appropriately (show a message or skip)
+                    Log.w(TAG, "BLUETOOTH_CONNECT permission not granted, cannot display device name");
+                    updateStatus("Device connected");
+                    editor.putString("connStatus", "Connected");
+                }
+
             }
             else if(status.equals("disconnected")){
                 Log.d(TAG, "mBroadcastReceiver5: Disconnected from "+mDevice.getName());
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                }
                 updateStatus("Disconnected from "
                         + mDevice.getName());
 
@@ -368,31 +383,7 @@ public class Home extends Fragment {
             if (message.contains("STATUS")) {
                 robotStatusTextView.setText(message.split(":")[1]);
             }
-            //ROBOT|5,4,EAST (Early version of updating robot position via comms)
-            /*if(message.contains("ROBOT")) {
-                String[] cmd = message.split("\\|");
-                String[] sentCoords = cmd[1].split(",");
-                String[] sentDirection = sentCoords[2].split("\\.");
-//                BluetoothCommunications.getMessageReceivedTextView().append("\n");
-                String direction = "";
-                String abc = String.join("", sentDirection);
-                if (abc.contains("EAST")) {
-                    direction = "right";
-                }
-                else if (abc.contains("NORTH")) {
-                    direction = "up";
-                }
-                else if (abc.contains("WEST")) {
-                    direction = "left";
-                }
-                else if (abc.contains("SOUTH")) {
-                    direction = "down";
-                }
-                else{
-                    direction = "";
-                }
-                gridMap.setCurCoord(Integer.valueOf(sentCoords[1]) + 2, 19 - Integer.valueOf(sentCoords[0]), direction);
-            }*/
+            
             if (message.contains("ROBOT")) {
                 try {
                     // Expect "ROBOT|x,y,BEARING"

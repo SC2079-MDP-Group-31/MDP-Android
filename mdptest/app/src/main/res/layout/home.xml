@@ -3,351 +3,375 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/lightPurple">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+    android:padding="8dp">
 
+        <!-- Map Section -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="431dp"
-            android:layout_marginTop="5dp"
-            android:orientation="horizontal">
+            android:layout_height="0dp"
+            android:layout_weight="2.2"
+            android:orientation="horizontal"
+            android:background="@color/purple_200"
+            android:padding="4dp"
+            android:layout_marginBottom="4dp"
+            android:elevation="1dp"
+            android:clipToPadding="false"
+            android:backgroundTint="@color/purple_200"
+            android:gravity="center_vertical">
 
+            <view
+                android:id="@+id/mapView"
+                class="com.example.mdp_group_31.GridMap"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:background="@color/white"
+                android:layout_marginEnd="2dp"
+                android:backgroundTint="@color/white"
+                android:elevation="1dp" />
+
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="Switch"
+                android:textColor="@color/royalPurple"
+                android:thumbTint="@color/royalPurple"
+                android:trackTint="@color/purple_200"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <!-- Status and Controls Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Status and D-Pad Panel (now stacked vertically) -->
             <LinearLayout
-                android:layout_width="430dp"
-                android:layout_height="430dp"
-                android:orientation="horizontal">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@color/purple_200"
+                android:padding="6dp"
+                android:layout_marginEnd="4dp"
+                android:elevation="1dp"
+                android:clipToPadding="false"
+                android:backgroundTint="@color/purple_200"
+                android:gravity="top">
 
-                <view
-                    android:id="@+id/mapView"
-                    class="com.example.mdp_group_31.GridMap"
-                    android:layout_width="match_parent"
-                    android:layout_height="430dp" />
-
-                <Switch
-                    android:id="@+id/switch1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Switch" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="150dp"
-                android:layout_height="380dp"
-                android:layout_marginStart="7dp"
-                android:gravity="center"
-                android:orientation="vertical">
-
+                <!-- Status Messages -->
                 <TextView
                     android:id="@+id/bluetoothConnection"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:background="@drawable/status_bar"
+                    android:layout_height="wrap_content"
+                    android:background="@color/royalPurple"
                     android:gravity="center"
                     android:text="BLUETOOTH"
                     android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textStyle="bold" />
-                <!--        app:drawableLeftCompat="@mipmap/left"
-        app:drawableRightCompat="@mipmap/right"-->
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="0dp" />
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/bluetoothStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/container_black"
-                    android:orientation="vertical">
+                    android:background="@color/white"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="@string/bluetooth_connection"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="2dp" />
 
-                    <TextView
-                        android:id="@+id/bluetoothStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center"
-                        android:text="@string/bluetooth_connection"
-                        android:textAlignment="center"
-                        android:textColor="@android:color/holo_red_dark" />
-
-                    <TextView
-                        android:id="@+id/bluetoothConnectedDevice"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center"
-                        android:text="Connected Device"
-                        android:textAlignment="center"
-                        android:textColor="@color/black" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/bluetoothConnectedDevice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="Connected Device"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/status_bar"
+                    android:layout_height="wrap_content"
+                    android:background="@color/royalPurple"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="ROBOT STATUS"
                     android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textStyle="bold" />
-                <!--
-            app:drawableLeftCompat="@mipmap/left"
-            app:drawableRightCompat="@mipmap/right"-->
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="0dp" />
 
                 <TextView
                     android:id="@+id/robotStatus"
                     android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/container_black"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="Ready to Start"
                     android:textAlignment="center"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@color/colorBlack"
+                    android:textSize="12sp"
+                    android:paddingBottom="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:id="@+id/directionLabel"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/status_bar"
+                    android:layout_height="wrap_content"
+                    android:background="@color/royalPurple"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="DIRECTION"
                     android:textAlignment="center"
-                    android:textColor="@color/black" />
-                <!--
-            app:drawableLeftCompat="@mipmap/left"
-            app:drawableRightCompat="@mipmap/right"-->
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="3dp" />
 
                 <TextView
                     android:id="@+id/directionAxisTextView"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/container_black"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="None"
                     android:textAlignment="center"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@color/colorBlack"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:id="@+id/CoordsLabel"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/status_bar"
+                    android:layout_height="wrap_content"
+                    android:background="@color/royalPurple"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="COORDINATES"
                     android:textAlignment="center"
-                    android:textColor="@color/black" />
-                <!--        android:drawableLeft="@mipmap/left"
-            android:drawableRight="@mipmap/right"-->
-
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:padding="3dp"
+                    android:layout_marginBottom="3dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/container_black"
-                    android:orientation="horizontal">
+                    android:background="@color/white"
+                    android:orientation="horizontal"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    android:layout_marginBottom="0dp">
 
                     <TextView
                         android:id="@+id/robotX"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
+                        android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
                         android:gravity="center"
-                        android:paddingStart="25dp"
                         android:text="X:"
                         android:textAlignment="center"
                         android:textColor="@color/colorBlack"
-                        android:textSize="16sp" />
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/xAxisTextView"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:paddingStart="7dp"
+                        android:layout_height="wrap_content"
                         android:text="0"
                         android:textColor="@color/colorBlack"
-                        android:textSize="16sp" />
+                        android:textSize="11sp"
+                        android:layout_marginStart="4dp" />
 
                     <TextView
                         android:id="@+id/robotY"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:layout_marginStart="2dp"
+                        android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
                         android:gravity="center"
-                        android:paddingStart="20dp"
                         android:text="Y:"
                         android:textAlignment="center"
                         android:textColor="@color/colorBlack"
-                        android:textSize="16sp" />
+                        android:textSize="11sp"
+                        android:layout_marginStart="8dp" />
 
                     <TextView
                         android:id="@+id/yAxisTextView"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
-                        android:paddingStart="7dp"
+                        android:layout_height="wrap_content"
                         android:text="0"
                         android:textColor="@color/colorBlack"
-                        android:textSize="16sp" />
+                        android:textSize="11sp"
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="400dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/view_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-                    <com.google.android.material.tabs.TabLayout
-
-                        android:id="@+id/tabs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:tabGravity="center"
-                        app:tabIndicator="@drawable/selected_tab2"
-                        app:tabIndicatorAnimationMode="elastic"
-                        app:tabIndicatorColor="@null"
-                        app:tabIndicatorGravity="stretch"
-                        app:tabMinWidth="130dp"
-                        app:tabMode="scrollable"
-                        app:tabRippleColor="@null"
-                        app:tabSelectedTextColor="@color/colorBlack" />
-
-                </androidx.viewpager.widget.ViewPager>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
+                <!-- D-Pad Controls (moved below status) -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_marginTop="0dp"
+                    android:paddingTop="0dp"
+                    android:layout_marginBottom="0dp">
+
+                    <TextView
+                        android:id="@+id/RoundCircle"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="10sp" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/RoundCircle"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="15dp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="15dp"
-                        android:orientation="horizontal">
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
 
                         <ImageButton
                             android:id="@+id/leftBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="10dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
-                            android:foreground="@drawable/poke_left" />
+                            android:foreground="@drawable/poke_left"
+                            android:layout_marginEnd="6dp" />
 
-                        <!--                        android:background="@drawable/circular_button"-->
                         <ImageButton
                             android:id="@+id/upBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="15dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
                             android:foreground="@drawable/poke_up" />
 
                         <ImageButton
                             android:id="@+id/rightBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="15dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
-                            android:foreground="@drawable/poke_right" />
+                            android:foreground="@drawable/poke_right"
+                            android:layout_marginStart="6dp" />
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="15dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
                         android:gravity="center"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="4dp">
 
                         <ImageButton
                             android:id="@+id/bleftBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
-                            android:foreground="@drawable/back_turn_left_arrow_icon" />
+                            android:foreground="@drawable/back_turn_left_arrow_icon"
+                            android:layout_marginEnd="6dp" />
 
                         <ImageButton
                             android:id="@+id/downBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="15dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
                             android:foreground="@drawable/poke_down" />
 
                         <ImageButton
                             android:id="@+id/brightBtn"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginStart="15dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:background="@color/transparent"
-                            android:foreground="@drawable/back_turn_right_arrow_icon" />
+                            android:foreground="@drawable/back_turn_right_arrow_icon"
+                            android:layout_marginStart="6dp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
+                <!-- Bluetooth Button -->
+                <ImageButton
+                    android:id="@+id/bluetoothButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:background="@color/white"
+                    android:foreground="@drawable/bt_ball"
+                    android:scaleType="fitXY"
+                    android:layout_marginTop="8dp"
+                    android:elevation="1dp" />
+            </LinearLayout>
+
+            <!-- Tabs/Pages (now take more space) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:orientation="vertical"
+                android:background="@color/purple_200"
+                android:padding="3dp"
+                android:layout_marginBottom="0dp"
+                android:paddingBottom="0dp"
+                android:layout_marginTop="0dp"
+                android:backgroundTint="@color/purple_200">
+
+                <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/view_pager"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    android:layout_marginTop="4dp" />
 
-                    <ImageButton
-                        android:id="@+id/bluetoothButton"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_marginLeft="26dp"
-                        android:layout_weight="1"
-                        android:background="@color/white"
-                        android:foreground="@drawable/bt_ball"
-                        android:scaleType="fitXY" />
-
-                </LinearLayout>
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabGravity="center"
+                    app:tabIndicator="@drawable/selected_tab2"
+                    app:tabIndicatorAnimationMode="elastic"
+                    app:tabIndicatorColor="@color/royalPurple"
+                    app:tabIndicatorGravity="stretch"
+                    app:tabMinWidth="80dp"
+                    app:tabMode="scrollable"
+                    app:tabRippleColor="@color/purple_200"
+                    app:tabSelectedTextColor="@color/royalPurple"
+                    android:textSize="11sp" />
 
             </LinearLayout>
         </LinearLayout>
-
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
