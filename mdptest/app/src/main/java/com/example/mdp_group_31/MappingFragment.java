@@ -19,7 +19,8 @@ import android.widget.ToggleButton;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
+import android.widget.LinearLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -49,6 +50,8 @@ public class MappingFragment extends Fragment {
     static String path="LL";
     static boolean dragStatus;
     static boolean changeObstacleStatus;
+
+    int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 
     String direction = "";
     @Override
@@ -80,43 +83,65 @@ public class MappingFragment extends Fragment {
         loadMapObstacle = root.findViewById(R.id.loadBtn);
         dragSwitch = root.findViewById(R.id.dragSwitch);
 
-        // === BEGIN: Add "Send Obstacles" button under the Drag switch ===
-        ViewGroup parent = (ViewGroup) dragSwitch.getParent();
-        if (parent != null) {
-            Button sendAllBtn = new Button(getContext());
-            sendAllBtn.setText("Send Obstacles");
-            sendAllBtn.setAllCaps(false);
-            sendAllBtn.setId(View.generateViewId());
+        // === BEGIN: Create a full-width button directly BELOW the Drag row ===
+        ViewGroup dragRow      = (ViewGroup) dragSwitch.getParent();   // the small container that holds the switch
+        ViewGroup blockContainer = (ViewGroup) dragRow.getParent();    // the big panel that contains "Change" row + "Drag" row
 
-            // Insert directly below the Drag switch in the same container
-            int insertAt = parent.indexOfChild(dragSwitch) + 1;
-            if (insertAt < 0 || insertAt > parent.getChildCount()) insertAt = parent.getChildCount();
-            parent.addView(sendAllBtn, insertAt);
+        Button sendAllBtn = new Button(getContext());
+        sendAllBtn.setText("Send Obstacles");
+        sendAllBtn.setAllCaps(false);
+        sendAllBtn.setId(View.generateViewId());
+        sendAllBtn.setMaxLines(1); // avoid vertical wrapping
 
-            sendAllBtn.setOnClickListener(v -> {
-                try {
-                    // Ensure we only send when the button is pressed
-                    GridMap.AUTO_SEND_OBS_UPDATES = false;
+        int insertIndex = blockContainer.indexOfChild(dragRow) + 1;    // directly after the Drag row
 
-                    String payload = GridMap.buildAlgBatchString();
-                    if ("ALG:".equals(payload)) {
-                        Toast.makeText(getContext(), "No obstacles to send.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        if (blockContainer instanceof LinearLayout) {
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            lp.topMargin = dp(8);
+            sendAllBtn.setLayoutParams(lp);
+            ((LinearLayout) blockContainer).addView(sendAllBtn, insertIndex, lp);
 
-                    // Send via your existing helper
-                    Home.printMessage(payload);
-                    Toast.makeText(getContext(), "Sent obstacles batch.", Toast.LENGTH_SHORT).show();
+        } else if (blockContainer instanceof ConstraintLayout) {
+            if (dragRow.getId() == View.NO_ID) dragRow.setId(View.generateViewId());
+            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT  // 0 width = match constraints
+            );
+            lp.topToBottom = dragRow.getId();
+            lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+            lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
+            lp.setMargins(dp(12), dp(8), dp(12), dp(8));
+            sendAllBtn.setLayoutParams(lp);
+            ((ConstraintLayout) blockContainer).addView(sendAllBtn, lp);
 
-                    // Optional: also echo to chat pane for debugging
-                    // Home.refreshMessageReceivedNS("TX: " + payload);
-
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "Failed to send obstacles: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+        } else {
+            // Fallback for other containers
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            sendAllBtn.setLayoutParams(lp);
+            blockContainer.addView(sendAllBtn, insertIndex);
         }
-// === END: Add "Send Obstacles" button ===
+
+// Click → build & send the batch string
+        sendAllBtn.setOnClickListener(v -> {
+            try {
+                GridMap.AUTO_SEND_OBS_UPDATES = false;
+                String payload = GridMap.buildAlgBatchString();
+                if ("ALG:".equals(payload)) {
+                    Toast.makeText(getContext(), "No obstacles to send.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Home.printMessage(payload);
+                Toast.makeText(getContext(), "Sent obstacles batch.", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Failed to send obstacles: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+// === END ===
 
 
         changeObstacleSwitch = root.findViewById(R.id.changeObstacleSwitch);
