@@ -16,6 +16,11 @@ import android.widget.Switch;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
+
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -74,6 +79,46 @@ public class MappingFragment extends Fragment {
         saveMapObstacle = root.findViewById(R.id.saveBtn);
         loadMapObstacle = root.findViewById(R.id.loadBtn);
         dragSwitch = root.findViewById(R.id.dragSwitch);
+
+        // === BEGIN: Add "Send Obstacles" button under the Drag switch ===
+        ViewGroup parent = (ViewGroup) dragSwitch.getParent();
+        if (parent != null) {
+            Button sendAllBtn = new Button(getContext());
+            sendAllBtn.setText("Send Obstacles");
+            sendAllBtn.setAllCaps(false);
+            sendAllBtn.setId(View.generateViewId());
+
+            // Insert directly below the Drag switch in the same container
+            int insertAt = parent.indexOfChild(dragSwitch) + 1;
+            if (insertAt < 0 || insertAt > parent.getChildCount()) insertAt = parent.getChildCount();
+            parent.addView(sendAllBtn, insertAt);
+
+            sendAllBtn.setOnClickListener(v -> {
+                try {
+                    // Ensure we only send when the button is pressed
+                    GridMap.AUTO_SEND_OBS_UPDATES = false;
+
+                    String payload = GridMap.buildAlgBatchString();
+                    if ("ALG:".equals(payload)) {
+                        Toast.makeText(getContext(), "No obstacles to send.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Send via your existing helper
+                    Home.printMessage(payload);
+                    Toast.makeText(getContext(), "Sent obstacles batch.", Toast.LENGTH_SHORT).show();
+
+                    // Optional: also echo to chat pane for debugging
+                    // Home.refreshMessageReceivedNS("TX: " + payload);
+
+                } catch (Exception e) {
+                    Toast.makeText(getContext(), "Failed to send obstacles: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+// === END: Add "Send Obstacles" button ===
+
+
         changeObstacleSwitch = root.findViewById(R.id.changeObstacleSwitch);
         // testing
         emergencyBtn = root.findViewById(R.id.eBtn);

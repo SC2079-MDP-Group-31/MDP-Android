@@ -81,6 +81,8 @@ public class GridMap extends View {
     private static Cell[][] cells;
     Map<String, String> val2IdxMap;
 
+    public static volatile boolean AUTO_SEND_OBS_UPDATES = false;
+
     private boolean mapDrawn = false;
     private static final int CELL_LENGTH = 5; //length of each cell in cm
     private static final int LEFT_TURNING_RADIUS = 40;
@@ -491,7 +493,7 @@ public class GridMap extends View {
         dir = (direction.equals("up")) ? "NORTH" : (direction.equals("down")) ? "SOUTH" : (direction.equals("left")) ? "WEST" : "EAST";
 
         if ((col - 2) >= 0 && (row - 1) >= 0) {
-            Home.printMessage("ROBOT" + "," + (col - 2) * 5 + "," + (row - 1) * 5 + "," + dir.toUpperCase());
+                Home.printMessage("ROBOT" + "," + (col - 2) * 5 + "," + (row - 1) * 5 + "," + dir.toUpperCase());
         } else {
             showLog("out of grid");
         }
@@ -616,11 +618,12 @@ public class GridMap extends View {
         int obstacleNumber = GridMap.obstacleCoord.size();
 
         if (((col - 1)) >= 0 && row >= 0) {
-
-            Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1) * 10 + "," + (19 - row) * 10 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase() + "\n");
+            if (AUTO_SEND_OBS_UPDATES) {
+                Home.printMessage("OBSTACLE" + "," + obstacleNumber + "," + (col - 1) * 10 + "," + (19 - row) * 10 + "," + (imageBearings.get(19 - row)[col - 1]).toUpperCase() + "\n");
 //            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((col - 1))+"\n");
 //            BluetoothCommunications.getMessageReceivedTextView().append(Integer.toString((19 - row))+"\n");
 //            BluetoothCommunications.getMessageReceivedTextView().append((imageBearings.get(19 - row)[col - 1]).toUpperCase()+"\n");
+            }
         } else {
             showLog("out of grid");
         }
@@ -745,8 +748,10 @@ public class GridMap extends View {
 
             //updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
             if (((initialColumn - 1)) >= 0 && ((initialRow - 1)) >= 0) {
-                Home.printMessage("OBSTACLE" + "," + (obstacleid3 + 1) + "," + (initialColumn) * 10 + "," + (initialRow) * 10 + "," + "-1");
-            } else {
+                if (AUTO_SEND_OBS_UPDATES) {
+                    Home.printMessage("OBSTACLE" + "," + (obstacleid3 + 1) + "," + (initialColumn) * 10 + "," + (initialRow) * 10 + "," + "-1");
+                }
+                } else {
                 showLog("out of grid");
             }
 
@@ -783,8 +788,10 @@ public class GridMap extends View {
                 //updateStatus( obstacleNumber + "," + (initialColumn) + "," + (initialRow) + ", Bearing: " + "-1");
 
                 if (((initialColumn - 1)) >= 0 && ((initialRow - 1)) >= 0) {
-                    Home.printMessage("OBSTACLE" + "," + (obstacleid2 + 1) + "," + (initialColumn) * 10 + "," + (initialRow) * 10 + "," + "-1");
-                } else {
+                    if (AUTO_SEND_OBS_UPDATES) {
+                        Home.printMessage("OBSTACLE" + "," + (obstacleid2 + 1) + "," + (initialColumn) * 10 + "," + (initialRow) * 10 + "," + "-1");
+                    }
+                    } else {
                     showLog("out of grid");
                 }
 
@@ -820,7 +827,9 @@ public class GridMap extends View {
                     //updateStatus(obstacleid+1+ "," + (endColumn-1) + "," + (endRow-1) + ", Bearing: " + tempBearing);
 
                     if (((endColumn - 1)) >= 0 && ((endRow - 1)) >= 0) {
-                        Home.printMessage("OBSTACLE" + "," + (obstacleid + 1) + "," + (endColumn - 1) * 10 + "," + (endRow - 1) * 10 + "," + tempBearing.toUpperCase());
+                        if (AUTO_SEND_OBS_UPDATES) {
+                            Home.printMessage("OBSTACLE" + "," + (obstacleid + 1) + "," + (endColumn - 1) * 10 + "," + (endRow - 1) * 10 + "," + tempBearing.toUpperCase());
+                        }
                     } else {
                         showLog("out of grid");
                     }
@@ -968,8 +977,10 @@ public class GridMap extends View {
                             //updateStatus( (obstacleid+1) + "," + newID + ","+(tCol - 1) + "," + (tRow - 1) + ", Bearing: " + newBearing);
 
                             if (((tCol - 1)) >= 0 && ((tRow - 1)) >= 0) {
-                                Home.printMessage("OBSTACLE" + "," + (obstacleid + 1) + "," + (tCol - 1) * 10 + "," + (tRow - 1) * 10 + "," + newBearing.toUpperCase());
-                            } else {
+                                if (AUTO_SEND_OBS_UPDATES) {
+                                    Home.printMessage("OBSTACLE" + "," + (obstacleid + 1) + "," + (tCol - 1) * 10 + "," + (tRow - 1) * 10 + "," + newBearing.toUpperCase());
+                                }
+                                } else {
                                 showLog("out of grid");
                             }
                             callInvalidate();
@@ -2160,6 +2171,43 @@ public class GridMap extends View {
         Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP,0, 0);
         toast.show();
+    }
+
+    // Map "up/right/down/left" or "NORTH/EAST/SOUTH/WEST" to 'N','E','S','W'
+    private static char resolveDirChar(int row, int col) {
+        try {
+            String b = imageBearings.get(row)[col];
+            if (b == null) return 'N';
+            b = b.trim().toUpperCase();
+            // handle both wordy and UI forms ("UP"/"RIGHT") and compass forms ("NORTH"/"E")
+            if (b.startsWith("N") || b.startsWith("U")) return 'N'; // NORTH / UP
+            if (b.startsWith("E") || b.startsWith("R")) return 'E'; // EAST / RIGHT
+            if (b.startsWith("S") || b.startsWith("D")) return 'S'; // SOUTH / DOWN
+            if (b.startsWith("W") || b.startsWith("L")) return 'W'; // WEST / LEFT
+        } catch (Exception ignore) {}
+        return 'N';
+    }
+
+    /** Builds "ALG:<ROW>,<COLUMN>,<DIRECTION>,<OBSTACLEID>;...;" from current obstacles.
+     *  Uses obstacleCoord as ground truth; includes obstacles whether or not an image is present.
+     */
+    public static String buildAlgBatchString() {
+        StringBuilder sb = new StringBuilder("ALG:");
+        // snapshot to avoid ConcurrentModification if user edits while building
+        java.util.List<int[]> snapshot = new java.util.ArrayList<>(obstacleCoord);
+        for (int i = 0; i < snapshot.size(); i++) {
+            int[] rc = snapshot.get(i);
+            int col = rc[0]; // zero-based
+            int row = rc[1]; // zero-based
+            char dir = resolveDirChar(row, col);
+
+            // ROW,COLUMN,DIRECTION,OBSTACLEID;
+            sb.append(col).append(",")
+                    .append(row).append(",")
+                    .append(dir).append(",")
+                    .append(i).append(";");
+        }
+        return sb.toString();
     }
 
 }
