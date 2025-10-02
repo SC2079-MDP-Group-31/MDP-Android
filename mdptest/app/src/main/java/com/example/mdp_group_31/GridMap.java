@@ -493,7 +493,7 @@ public class GridMap extends View {
         dir = (direction.equals("up")) ? "NORTH" : (direction.equals("down")) ? "SOUTH" : (direction.equals("left")) ? "WEST" : "EAST";
 
         if ((col - 2) >= 0 && (row - 1) >= 0) {
-                Home.printMessage("ROBOT" + "," + (col - 2) * 5 + "," + (row - 1) * 5 + "," + dir.toUpperCase());
+                //Home.printMessage("ROBOT" + "," + (col - 2) * 5 + "," + (row - 1) * 5 + "," + dir.toUpperCase());
         } else {
             showLog("out of grid");
         }

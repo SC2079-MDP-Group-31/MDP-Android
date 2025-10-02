@@ -289,7 +289,7 @@ public class Home extends Fragment {
         if ((x - 2)>=0 && (y - 1)>=0)
         {
 //          BluetoothCommunications.getMessageReceivedTextView().append("ROBOT" + "," + (col - 2)*5 + "," + (row - 1)*5 + "," + dir.toUpperCase());
-            Home.printMessage("ROBOT" + "," + (x-2)*5 + "," + (y-1)*5 + "," + dir.toUpperCase());
+//            Home.printMessage("ROBOT" + "," + (x-2)*5 + "," + (y-1)*5 + "," + dir.toUpperCase());
         }
         else{
             showLog("out of grid");
@@ -435,7 +435,7 @@ public class Home extends Fragment {
                     e.printStackTrace();
                 }
             }
-            //image format from RPI is "TARGET~<obID>~<ImValue>" eg TARGET~3~7
+            //image format from RPI is "TARGET,<obID>,<ImValue>" eg TARGET~3~7
             else if(message.contains("TARGET")) {
                 try {
                     String[] cmd = message.split(",");

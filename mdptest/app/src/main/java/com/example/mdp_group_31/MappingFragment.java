@@ -143,6 +143,67 @@ public class MappingFragment extends Fragment {
         });
 // === END ===
 
+        // --- START button placed directly BELOW the "Send Obstacles" button ---
+
+        // Make sure sendAllBtn exists above this block.
+        // We’ll add a Start button after it, full width, with small top margin.
+        Button startBtn = new Button(getContext());
+        startBtn.setText("Start");
+        startBtn.setAllCaps(false);
+        startBtn.setId(View.generateViewId());
+        startBtn.setMaxLines(1); // keep label on one line
+
+        int startInsertIndex = blockContainer.indexOfChild(sendAllBtn) + 1;
+
+        if (blockContainer instanceof LinearLayout) {
+            LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            lp2.topMargin = dp(8);
+            startBtn.setLayoutParams(lp2);
+            ((LinearLayout) blockContainer).addView(startBtn, startInsertIndex, lp2);
+
+        } else if (blockContainer instanceof androidx.constraintlayout.widget.ConstraintLayout) {
+            // Ensure sendAllBtn has an ID for constraints
+            if (sendAllBtn.getId() == View.NO_ID) sendAllBtn.setId(View.generateViewId());
+            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams lp2 =
+                    new androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(
+                            0, ViewGroup.LayoutParams.WRAP_CONTENT // match constraints
+                    );
+            lp2.topToBottom = sendAllBtn.getId();
+            lp2.startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
+            lp2.endToEnd   = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID;
+            lp2.setMargins(dp(12), dp(8), dp(12), dp(8));
+            startBtn.setLayoutParams(lp2);
+            ((androidx.constraintlayout.widget.ConstraintLayout) blockContainer).addView(startBtn, lp2);
+
+        } else {
+            // Fallback
+            ViewGroup.LayoutParams lp2 = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            startBtn.setLayoutParams(lp2);
+            blockContainer.addView(startBtn, startInsertIndex);
+        }
+
+// Click → send newline-terminated JSON to RPi
+        startBtn.setOnClickListener(v -> {
+            try {
+                // exact string + newline terminator
+                String json = "{\"cat\":\"control\",\"value\":\"start\"}\n";
+                Home.printMessage(json);   // your existing BT send helper
+
+                // Optional: echo in chat for debugging
+                // Home.refreshMessageReceivedNS("TX: " + json.trim());
+
+                Toast.makeText(getContext(), "Sent start", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Failed to send start: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         changeObstacleSwitch = root.findViewById(R.id.changeObstacleSwitch);
         // testing
