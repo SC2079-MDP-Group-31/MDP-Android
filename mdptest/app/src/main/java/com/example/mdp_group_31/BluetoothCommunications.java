@@ -15,6 +15,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import android.graphics.Color;
+import android.content.res.ColorStateList;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -43,6 +50,14 @@ public class BluetoothCommunications extends Fragment {
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_communications, container, false);
 
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Use the larger of IME or system bar bottoms
+            int bottom = Math.max(ime.bottom, sys.bottom);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
+            return insets; // don't consume; just adjust padding
+        });
 
         ImageButton send;
         send = root.findViewById(R.id.messageButton);
@@ -51,6 +66,17 @@ public class BluetoothCommunications extends Fragment {
         messageReceivedTextView = root.findViewById(R.id.messageReceivedTitleTextView);
         messageReceivedTextView.setMovementMethod(new ScrollingMovementMethod());
         typeBoxEditText = root.findViewById(R.id.typeBoxEditText);
+
+        // Make typed text readable
+                typeBoxEditText.setTextColor(Color.BLACK);              // typed characters
+                typeBoxEditText.setHintTextColor(Color.parseColor("#7A7A7A")); // placeholder/hint
+
+        // Optional: make the underline/cursor/tint visible on your purple panel
+                typeBoxEditText.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#9E9E9E")));
+
+        // (Optional) Make the chat log readable too, if needed
+                messageReceivedTextView.setTextColor(Color.BLACK);
+
 
         // get shared preferences
         sharedPreferences = getActivity().getSharedPreferences("Shared Preferences", Context.MODE_PRIVATE);

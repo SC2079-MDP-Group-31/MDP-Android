@@ -438,8 +438,10 @@ public class Home extends Fragment {
             //image format from RPI is "TARGET,<obID>,<ImValue>" eg TARGET~3~7
             else if(message.contains("TARGET")) {
                 try {
-                    String[] cmd = message.split(",");
-                    String temp2="-1";
+                    String[] cmd = message.trim().split(",");
+                    if (cmd.length >= 3) {
+                        String oid = cmd[1].trim();   // already zero-based from RPi
+                        String img = cmd[2].trim();
                     BluetoothCommunications.getMessageReceivedTextView().append("Obstacle no: " + cmd[1]+ "TARGET ID: " + cmd[2] + "\n");
 
 //                    if (cmd[2].contains("STOP"))
@@ -450,8 +452,8 @@ public class Home extends Fragment {
 //
 //                    }
 
-                    gridMap.updateIDFromRpi(String.valueOf(Integer.valueOf(cmd[1])-1), cmd[2]);
-                    obstacleID = String.valueOf(Integer.valueOf(cmd[1]) - 2);
+                        gridMap.updateIDFromRpi(oid, img); // NO off-by-one fixes here
+                    }
 
 
 //                    int ob= Integer.parseInt(obstacleID);
